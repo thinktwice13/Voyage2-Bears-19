@@ -68,8 +68,8 @@ exports.msg = {
       userSolved: 'Solved',
     },
     list: {
-      empty: 'No tickets to show. :success-bunny:',
-      noOpen: 'No open tickets to show. :success-bunny:',
+      empty: 'No tickets to show :success-bunny:',
+      noOpen: 'No open tickets to show :success-bunny:',
       noSolved: 'No solved tickets to show.',
     },
   },

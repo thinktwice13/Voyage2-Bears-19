@@ -218,13 +218,12 @@ exports.updateTicket = async (ticketId, authorId, teamId, newStatus) => {
  * @param {string} userToken
  * @param {string} botToken
  */
-exports.setTokens = async (teamId, userToken, botToken) => {
-  await firebase
+exports.setTokens = async (teamId, userToken, botToken) =>
+  firebase
     .database()
     .ref('tokens')
     .child(teamId)
     .set({ userToken, botToken });
-};
 
 /**
  * Get team's access tokens

@@ -16,14 +16,13 @@
   },
   "homepage": "https://tickybott.herokuapp.com/",
   "scripts": {
-    "servertest":
-      "concurrently \"npm run test\" \"node -r dotenv/config ./server/server.js\"",
-    "start": "node -r dotenv/config ./server/server.js",
-    "dev": "concurrently \"npm run test\" \"npm run server\"",
     "test": "jest --watchAll --coverage",
+    "dev:client": "NODE_ENV=development webpack-dev-server",
+    "dev:server": "nodemon -r dotenv/config ./server/server.js",
+    "dev": "npm-run-all -pnr test dev:*",
+    "start": "node -r dotenv/config ./server/server.js",
     "build": "NODE_ENV=production webpack",
-    "devserver": "NODE_ENV=development webpack-dev-server",
-    "heroku-postbuild": "npm install && npm run build"
+    "heroku-postbuild": "npm install && npm install --only=dev && npm run build"
   },
   "author": "Osycon, thinktwice13, miljan-fsd, Zsolti",
   "license": "MIT",
@@ -32,7 +31,6 @@
   },
   "dependencies": {
     "body-parser": "^1.18.2",
-    "concurrently": "^3.5.0",
     "dotenv": "^4.0.0",
     "express": "^4.16.1",
     "firebase": "^4.6.0",
@@ -69,6 +67,7 @@
     "jest": "^21.2.1",
     "node-sass": "^4.6.0",
     "nodemon": "^1.12.1",
+    "npm-run-all": "^4.1.2",
     "postcss-loader": "^2.0.8",
     "react-hot-loader": "^3.1.2",
     "react-test-renderer": "^16.1.0",
@@ -78,5 +77,6 @@
     "url-loader": "^0.6.2",
     "webpack": "^3.8.1",
     "webpack-dev-server": "^2.9.4"
-  }
+  },
+  "cacheDirectories": ["node_modules"]
 }
