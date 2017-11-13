@@ -21,7 +21,7 @@ module.exports = (app) => {
       if (!error && response.statusCode === 200) {
         const { team_id, access_token, bot: { bot_access_token } } = JSON.parse(body);
         // Save user's access tokens to database
-        await setTokens(team_id, access_token, bot_access_token);
+        setTokens(team_id, access_token, bot_access_token);
         res.redirect('/success.html');
       }
     });

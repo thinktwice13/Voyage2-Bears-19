@@ -1,5 +1,5 @@
 const attach = require('./attachments');
-const firebaseHandler = require('../handlers/firebaseHandlers');
+const fb = require('../handlers/firebaseHandlers');
 const { newStatus } = require('../utils/constants');
 const { msg } = require('../utils/helpers');
 const { sendDM } = require('../handlers/slackApiHandlers');
@@ -103,7 +103,7 @@ exports.CONFIRM = async ({
 }) => {
   let text = null;
   if (command === 'OPEN') {
-    const number = await firebaseHandler.addNewTicket({
+    const number = await fb.addNewTicket({
       userId,
       teamId,
       username,
@@ -112,7 +112,7 @@ exports.CONFIRM = async ({
     });
     text = msg.confirm.submit(number, data);
   } else {
-    const { number } = await firebaseHandler.updateTicket(data, userId, teamId, newStatus[command]);
+    const { number } = await fb.updateTicket(data, userId, teamId, newStatus[command]);
     text = msg.confirm.newStatus(number, command);
     if (command === 'SOLVE') sendDM(userId, teamId, number);
   }
