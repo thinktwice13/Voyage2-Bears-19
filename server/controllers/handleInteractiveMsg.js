@@ -1,5 +1,5 @@
 const responses = require('../utils/responses');
-const { sendMessage, getUserInfo } = require('../handlers/responseHandlers');
+const { sendMessage, getUserInfo } = require('../handlers/slackApiHandlers');
 
 module.exports = async (req, res) => {
   // Respond quickly according to Slack best practices https://api.slack.com/interactive-messages
@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
     actions: [{ name: command, value: data }],
   } = res.locals.payload;
 
-  const isAdmin = (await getUserInfo(userId)).is_admin;
+  const isAdmin = (await getUserInfo(userId, teamId)).is_admin;
 
   const responseParams = {
     isAdmin,

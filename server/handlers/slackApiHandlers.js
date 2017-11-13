@@ -1,19 +1,25 @@
 const request = require('request-promise-native');
 const { msg } = require('../utils/helpers');
+const { getTokensByTeam } = require('./firebaseHandlers');
 
 /**
  * Requires USERS.PROFILE scope in Slack app permissions
  * @param {string} userId
+ * @param {string} teamId
  */
-exports.getUserInfo = (userId) => {
+exports.getUserInfo = async (userId, teamId) => {
   const data = {
-    token: process.env.SLACK_BOT_OAUTH_TOKEN,
+    token: (await getTokensByTeam(teamId)).botToken,
     user: userId,
   };
   return request
     .post('https://slack.com/api/users.info', { form: data })
-    .then(res => JSON.parse(res).user)
-    .catch(err => console.log({ err }));
+    .then((res) => {
+      const result = JSON.parse(res);
+      if (result.ok === true) return result.user;
+      console.log({ getUserInfoError: result.error });
+    })
+    .catch(console.log);
 };
 
 /**
@@ -22,19 +28,21 @@ exports.getUserInfo = (userId) => {
  * @param {string} userId
  * @param {string} message - Message text to send to the user
  */
-exports.sendDM = async (userId, ticketNumber) => {
+exports.sendDM = async (userId, teamId, ticketNumber) => {
+  const token = (await getTokensByTeam(teamId)).botToken;
+
   // Get ticket owner's direct message channel id
   const imList = await request.post('https://slack.com/api/im.list', {
-    form: { token: process.env.SLACK_BOT_OAUTH_TOKEN },
+    form: { token },
   });
   const userChannelId = JSON.parse(imList).ims.find(channel => channel.user === userId).id;
 
   request.post('https://slack.com/api/chat.postMessage', {
     form: {
+      token,
       id: 'ticket-solved',
       as_user: false,
       text: msg.notify(ticketNumber),
-      token: process.env.SLACK_BOT_OAUTH_TOKEN,
       channel: userChannelId,
     },
   });
@@ -51,5 +59,5 @@ exports.sendMessage = (responseURL, message) => {
     headers: { 'Content-type': 'application-json' },
     json: message,
   };
-  request(options).catch(err => console.log({ err }));
+  request(options).catch(console.log);
 };

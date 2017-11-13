@@ -1,7 +1,6 @@
 const responses = require('../utils/responses');
-const { commands } = require('../utils/constants');
-const { sendMessage, getUserInfo } = require('../handlers/responseHandlers');
-const firebaseHandler = require('../handlers/firebaseHandlers');
+const { sendMessage, getUserInfo } = require('../handlers/slackApiHandlers');
+const { getTicketByNumber } = require('../handlers/firebaseHandlers');
 const { parseInputText } = require('../utils/helpers');
 
 module.exports = async (req, res) => {
@@ -11,7 +10,7 @@ module.exports = async (req, res) => {
   /**
    * Content from users comes in as req.
    * If no input aside from slash command entered, send HELLO response.
-   * Otherwise tokenize input and extract command, optionsl ticket reference and the message and respond accordingly
+   * Otherwise tokenize input and extract command, optionsl ticket reference and the message
    * If command not recognized, respond with ERROR response
    */
 
@@ -27,9 +26,9 @@ module.exports = async (req, res) => {
   const { command, message, number } = parseInputText(text);
 
   // Construct promises array for initial async calls
-  const promises = [getUserInfo(userId)];
+  const promises = [getUserInfo(userId, teamId)];
   if (number) {
-    promises.push(firebaseHandler.getTicketByNumber(number));
+    promises.push(getTicketByNumber(number));
   }
 
   // Get admin status and construct the ticket from new or fetched data
