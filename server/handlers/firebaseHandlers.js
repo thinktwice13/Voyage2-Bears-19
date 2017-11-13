@@ -211,3 +211,26 @@ exports.updateTicket = async (ticketId, authorId, teamId, newStatus) => {
   const values = await ticketRef.once('value');
   return values.val();
 };
+
+/**
+ * Save access token
+ * @param {string} teamId
+ * @param {string} userToken
+ * @param {string} botToken
+ */
+exports.setTokens = async (teamId, userToken, botToken) =>
+  firebase
+    .database()
+    .ref('tokens')
+    .child(teamId)
+    .set({ userToken, botToken });
+
+/**
+ * Get team's access tokens
+ * @param {string} teamId
+ */
+exports.getTokensByTeam = async (teamId) => {
+  const ref = firebase.database().ref(`tokens/${teamId}`);
+  const values = await ref.once('value');
+  return values.val();
+};

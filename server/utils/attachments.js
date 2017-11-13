@@ -1,4 +1,4 @@
-const firebaseHandler = require('../handlers/firebaseHandlers');
+const fb = require('../handlers/firebaseHandlers');
 const { msg } = require('../utils/helpers');
 const { examples } = require('../utils/constants');
 
@@ -20,14 +20,15 @@ exports.usage = isAdmin => ({
 exports.show = ({ isAdmin, userId, teamId }) => {
   let promises = null;
   if (isAdmin) {
-    promises = [firebaseHandler.getAllOpenTicketsByTeam(teamId)];
+    promises = [fb.getAllOpenTicketsByTeam(teamId)];
   } else {
-    promises = [
-      firebaseHandler.getAllOpenTicketsByUser(userId),
-      firebaseHandler.getAllSolvedTicketsByUser(userId),
-    ];
+    promises = [fb.getAllOpenTicketsByUser(userId), fb.getAllSolvedTicketsByUser(userId)];
   }
 
+  const base = {
+    mrkdwn_in: ['pretext', 'text', 'fields'],
+    color: '#36a64f',
+  };
   return Promise.all(promises)
     .then((tickets) => {
       const ticketsOpen = tickets[0] && Object.values(tickets[0]);
@@ -35,7 +36,7 @@ exports.show = ({ isAdmin, userId, teamId }) => {
 
       // If no tickets in database
       if (!ticketsOpen && !ticketsSolved) {
-        return { text: msg.show.list.empty };
+        return { ...base, text: msg.show.list.empty };
       }
 
       // FIXME format visible ticket
@@ -44,11 +45,6 @@ exports.show = ({ isAdmin, userId, teamId }) => {
           .map(ticket =>
             `*#${ticket.number}* ${ticket.text}${isAdmin ? ` from <@${ticket.author}>` : ''}`)
           .join('\n');
-
-      const base = {
-        mrkdwn_in: ['pretext', 'text', 'fields'],
-        color: '#36a64f',
-      };
 
       if (isAdmin) {
         return {
