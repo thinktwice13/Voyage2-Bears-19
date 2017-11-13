@@ -2,7 +2,7 @@ const attach = require('./attachments');
 const firebaseHandler = require('../handlers/firebaseHandlers');
 const { newStatus } = require('../utils/constants');
 const { msg } = require('../utils/helpers');
-const { sendDM } = require('../handlers/responseHandlers');
+const { sendDM } = require('../handlers/slackApiHandlers');
 
 /**
  * Message responses based on intial slash commands or interactive messages
@@ -114,7 +114,7 @@ exports.CONFIRM = async ({
   } else {
     const { number } = await firebaseHandler.updateTicket(data, userId, teamId, newStatus[command]);
     text = msg.confirm.newStatus(number, command);
-    if (command === 'SOLVE') sendDM(userId, number);
+    if (command === 'SOLVE') sendDM(userId, teamId, number);
   }
 
   return {
