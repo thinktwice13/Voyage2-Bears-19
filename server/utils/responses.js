@@ -15,6 +15,8 @@ const { sendDM } = require('../handlers/slackApiHandlers');
  * @param {object} obj.ticket
  */
 
+// INITIAL SLASH COMMAND RESPONSES
+
 // Show open and/or pending tickets and usage instructions
 exports.HELLO = async ({ isAdmin }) => ({
   mrkdwn_in: ['text', 'attachments'],
@@ -41,56 +43,62 @@ exports.ERROR = ({ isAdmin }) => ({
   attachments: [attach.usage(isAdmin)],
 });
 
-// INITIAL SLASH COMMAND RESPONSES
-
-exports.OPEN = async ({ command, ticket }) => ({
+exports.OPEN = ({ command, ticket }) => ({
   attachments: [attach.confirm(command, ticket)],
 });
 
-exports.CLOSE = async ({
-  isAdmin, command, userId, ticket,
+exports.SOLVE = ({
+  isAdmin, command, teamId, ticket, ticket: { number, team, status },
 }) => {
-  if (!isAdmin && ticket.author === userId && ticket.status !== 'closed') {
-    return { attachments: [attach.confirm(command, ticket)] };
-  } else if (ticket.status === 'closed') {
-    return { text: msg.error.closed(ticket.number) };
-  }
-  return { text: msg.error.notAllowed, attachments: [attach.usage(isAdmin)] };
-};
-
-exports.SOLVE = async ({
-  isAdmin, command, ticket, teamId,
-}) => {
-  if (ticket.team !== teamId) {
-    return { text: msg.error.badTeam(ticket.number) };
-  } else if (ticket.status !== 'open') {
+  if (!isAdmin) {
+    return { text: msg.error.notAllowed, attachments: [attach.usage(isAdmin)] };
+  } else if (team !== teamId) {
+    return { text: msg.error.badTeam(number) };
+  } else if (status !== 'open') {
     return { text: msg.error.notAllowedStatus(ticket) };
-  } else if (isAdmin) {
-    return { attachments: [attach.confirm(command, ticket)] };
   }
-  return { text: msg.error.notAllowed, attachments: [attach.usage(isAdmin)] };
+  return { attachments: [attach.confirm(command, ticket)] };
 };
 
-exports.UNSOLVE = async ({
-  isAdmin, command, ticket, teamId,
+exports.UNSOLVE = ({
+  command,
+  userId,
+  teamId,
+  ticket,
+  ticket: {
+    number, author, status, team,
+  },
 }) => {
-  if (ticket.team !== teamId) {
-    return { text: msg.error.badTeam(ticket.number) };
-  } else if (ticket.status !== 'solved') {
+  if (team !== teamId) {
+    return { text: msg.error.badTeam(number) };
+  } else if (status !== 'solved') {
     return { text: msg.error.notAllowedStatus(ticket) };
-  } else if (!isAdmin) {
-    return { attachments: [attach.confirm(command, ticket)] };
+  } else if (author !== userId) {
+    return { text: msg.error.notAuthor(number) };
   }
-  return { text: msg.error.notAllowed, attachments: [attach.usage(isAdmin)] };
+  return { attachments: [attach.confirm(command, ticket)] };
 };
 
-// CANCEL ACTION
+exports.CLOSE = ({
+  command, userId, teamId, ticket, ticket: {
+    number, author, status, team,
+  },
+}) => {
+  if (team !== teamId) {
+    return { text: msg.error.badTeam(number) };
+  } else if (status === 'closed') {
+    return { text: msg.error.closed(number) };
+  } else if (author !== userId) {
+    return { text: msg.error.notAuthor(number) };
+  }
+  return { attachments: [attach.confirm(command, ticket)] };
+};
+
+// INTERACTIVE ACTIONS RESPONSES
 
 exports.CANCEL = ({ isAdmin }) => ({
   attachments: [attach.helpOrShowInteractive(isAdmin, 'Cancelled.')],
 });
-
-// CONFIRM ACTION
 
 exports.CONFIRM = async ({
   isAdmin,
@@ -115,7 +123,9 @@ exports.CONFIRM = async ({
   } else {
     await fb.updateTicket(id, author, teamId, newStatus[command]);
     message = msg.confirm.newStatus(number, command);
-    if (command === 'SOLVE') sendDM(author, userId, teamId, number, text);
+    if (command === 'SOLVE' && author !== userId) {
+      sendDM(author, userId, teamId, number, text);
+    }
   }
 
   return {

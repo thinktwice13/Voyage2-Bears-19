@@ -76,6 +76,7 @@ exports.msg = {
   },
   error: {
     text: ":thinking_face: I'm sorry, I don't understand. Check usage instructions below:",
+    notAuthor: number => `:no_entry_sign: Ticket *#${number}* is not yours.`,
     badTeam: number => `:no_entry_sign: Ticket *#${number}* doesn't exist in this team.`,
     notAllowedStatus: ({ number, author, status }) =>
       `:no_entry_sign: Not allowed. Ticket *#${number}* from <@${author}> is *${status}*.`,
