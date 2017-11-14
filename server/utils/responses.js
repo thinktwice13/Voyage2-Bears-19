@@ -43,16 +43,9 @@ exports.ERROR = ({ isAdmin }) => ({
 
 // INITIAL SLASH COMMAND RESPONSES
 
-exports.OPEN = async ({ isAdmin, command, ticket }) => {
-  if (isAdmin) {
-    return {
-      mrkdwn_in: ['text', 'attachments'],
-      text: msg.help.text,
-      attachments: [attach.usage(isAdmin)],
-    };
-  }
-  return ticket.text && { attachments: [attach.confirm(command, ticket)] };
-};
+exports.OPEN = async ({ command, ticket }) => ({
+  attachments: [attach.confirm(command, ticket)],
+});
 
 exports.CLOSE = async ({
   isAdmin, command, userId, ticket,

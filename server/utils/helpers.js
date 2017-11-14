@@ -11,12 +11,9 @@ const upperCaseFirst = str => str.charAt(0).toUpperCase() + str.slice(1).toLower
  * @param {string} inputText
  */
 exports.parseInputText = (inputText) => {
-  if (!inputText) {
-    return { command: 'HELLO' };
-  }
+  if (!inputText) return { command: 'HELLO' };
 
   let command;
-  let message;
   let number;
 
   // Tokenize input and uppercase first word
@@ -30,27 +27,26 @@ exports.parseInputText = (inputText) => {
     tokenized = tokenized.filter(token => token !== ticketReference[0]);
   }
 
-  // Join message and set no-command to OPEN command
-  if (commands.includes(command)) {
-    message = tokenized.splice(1).join(' ');
-  } else {
-    message = tokenized.join(' ');
+  if (!commands.includes(command)) {
     command = 'OPEN';
+    tokenized.unshift(command);
   }
 
-  // If required number or message missing, return ERROR command
-  if (
-    (!message && command === 'OPEN') ||
-    (!number && (command === 'SOLVE' || command === 'UNSOLVE' || command === 'CLOSE'))
-  ) {
-    command = 'ERROR';
-  }
+  const message = tokenized.splice(1).join(' ');
 
-  return {
-    command,
-    message,
-    number,
-  };
+  switch (command) {
+    case 'OPEN':
+      return message ? { command, message } : { command: 'ERROR' };
+    case 'CLOSE':
+    case 'SOLVE':
+    case 'UNSOLVE':
+      return number ? { command, number } : { command: 'ERROR' };
+    case 'HELP':
+    case 'SHOW':
+      return { command };
+    default:
+      return { command: 'ERROR' };
+  }
 };
 
 exports.msg = {
