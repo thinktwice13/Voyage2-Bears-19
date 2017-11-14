@@ -12,7 +12,7 @@ const { sendDM } = require('../handlers/slackApiHandlers');
  * @param {object} obj.ticket - An existing ticket referenced in a slash command OR a new ticket from OPEN slash command
  * @param {string} obj.userId
  * @param {string} obj.teamId
- * @param {string} obj.data - Data received from an interactive message. Can be a new ticket text OR an existing ticket id
+ * @param {object} obj.ticket
  */
 
 // Show open and/or pending tickets and usage instructions
@@ -99,26 +99,33 @@ exports.CANCEL = ({ isAdmin }) => ({
 // CONFIRM ACTION
 
 exports.CONFIRM = async ({
-  isAdmin, command, userId, teamId, username, data,
+  isAdmin,
+  command,
+  userId,
+  teamId,
+  username,
+  ticket: {
+    text, id, author, number,
+  },
 }) => {
-  let text = null;
+  let message = '';
   if (command === 'OPEN') {
-    const number = await fb.addNewTicket({
+    const num = await fb.addNewTicket({
       userId,
       teamId,
       username,
-      text: data.charAt(0).toUpperCase() + data.slice(1), // uppercase first letter
+      text: text.charAt(0).toUpperCase() + text.slice(1), // uppercase first letter
       isAdmin,
     });
-    text = msg.confirm.submit(number, data);
+    message = msg.confirm.submit(num, text);
   } else {
-    const { number } = await fb.updateTicket(data, userId, teamId, newStatus[command]);
-    text = msg.confirm.newStatus(number, command);
-    if (command === 'SOLVE') sendDM(userId, teamId, number);
+    await fb.updateTicket(id, author, teamId, newStatus[command]);
+    message = msg.confirm.newStatus(number, command);
+    if (command === 'SOLVE') sendDM(author, userId, teamId, number, text);
   }
 
   return {
-    text,
+    text: message,
     mrkdwn_in: ['text'],
   };
 };
