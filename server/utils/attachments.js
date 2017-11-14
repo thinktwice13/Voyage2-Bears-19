@@ -89,13 +89,13 @@ exports.helpOrShowInteractive = (isAdmin, message) => ({
       name: 'HELP',
       text: 'Help',
       type: 'button',
-      value: 'help',
+      value: '',
     },
     {
       name: 'SHOW',
       text: msg.btn.view,
       type: 'button',
-      value: 'show',
+      value: '',
     },
   ],
 });
@@ -105,9 +105,7 @@ exports.helpOrShowInteractive = (isAdmin, message) => ({
  * @param {object} ticket: {id, text, number} - Ticket referenced in a slash command
  * @returns {object} Constructed attachment to send with a response message
  */
-exports.confirm = (command, ticket) => {
-  const { id, text } = ticket;
-  return {
+exports.confirm = (command, ticket) => ({
     color: '#ffd740',
     text: msg.confirm.text(command, ticket),
     mrkdwn_in: ['text', 'actions'],
@@ -119,14 +117,13 @@ exports.confirm = (command, ticket) => {
         text: msg.btn.no,
         style: 'danger',
         type: 'button',
-        value: 'cancel',
+      value: '',
       },
       {
         name: command,
         text: msg.btn.yes(command),
         type: 'button',
-        value: id || text, // id is only undefined when OPENing a new ticket
+      value: JSON.stringify(ticket),
       },
     ],
-  };
-};
+});

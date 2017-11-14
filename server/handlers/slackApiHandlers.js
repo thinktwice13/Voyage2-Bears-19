@@ -25,25 +25,23 @@ exports.getUserInfo = async (userId, teamId) => {
 /**
  * Notofies user when their ticket is solved
  * REQUIRES chat:write, im:read, post, read scopes at
- * @param {string} userId
+ * @param {string} authorId
  * @param {string} message - Message text to send to the user
  */
-exports.sendDM = async (userId, teamId, ticketNumber) => {
+exports.sendDM = async (authorId, userId, teamId, ticketNumber, text) => {
   const token = (await getTokensByTeam(teamId)).botToken;
-
   // Get ticket owner's direct message channel id
   const imList = await request.post('https://slack.com/api/im.list', {
     form: { token },
   });
-  const userChannelId = JSON.parse(imList).ims.find(channel => channel.user === userId).id;
 
   request.post('https://slack.com/api/chat.postMessage', {
     form: {
       token,
-      id: 'ticket-solved',
       as_user: false,
-      text: msg.notify(ticketNumber),
-      channel: userChannelId,
+      id: 'ticket-solved',
+      text: msg.notify(ticketNumber, userId, text),
+      channel: JSON.parse(imList).ims.find(ch => ch.user === authorId).id,
     },
   });
 };

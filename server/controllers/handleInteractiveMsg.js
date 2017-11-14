@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
     user: { id: userId, name: username },
     team: { id: teamId },
     response_url: responseURL,
-    actions: [{ name: command, value: data }],
+    actions: [{ name: command, value: ticket }],
   } = res.locals.payload;
 
   const isAdmin = (await getUserInfo(userId, teamId)).is_admin;
@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
     username,
     teamId,
     command,
-    data, // contains existing ticket id OR new ticket text
+    ticket: ticket && JSON.parse(ticket),
   };
 
   // Determine and call an appropriate response
