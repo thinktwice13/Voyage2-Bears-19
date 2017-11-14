@@ -29,29 +29,25 @@ exports.show = ({ isAdmin, userId, teamId }) => {
     mrkdwn_in: ['pretext', 'text', 'fields'],
     color: '#36a64f',
   };
+
   return Promise.all(promises)
     .then((tickets) => {
-      const ticketsOpen = tickets[0] && Object.values(tickets[0]);
-      const ticketsSolved = tickets[1] && Object.values(tickets[1]);
+      const ticketsOpen =
+        tickets[0] && Object.values(tickets[0]).filter(ticket => ticket.team === teamId);
+      const ticketsSolved =
+        tickets[1] && Object.values(tickets[1]).filter(ticket => ticket.team === teamId);
 
       // If no tickets in database
       if (!ticketsOpen && !ticketsSolved) {
         return { ...base, text: msg.show.list.empty };
       }
 
-      // FIXME format visible ticket
-      const format = arr =>
-        arr
-          .map(ticket =>
-            `*#${ticket.number}* ${ticket.text}${isAdmin ? ` from <@${ticket.author}>` : ''}`)
-          .join('\n');
-
       if (isAdmin) {
         return {
           ...base,
           pretext: examples.short.admin,
           title: msg.show.title.adminTitle,
-          text: ticketsOpen ? format(ticketsOpen) : msg.show.list.noOpen,
+          text: ticketsOpen ? msg.show.list.format(ticketsOpen, isAdmin) : msg.show.list.noOpen,
         };
       }
       return {
@@ -61,11 +57,11 @@ exports.show = ({ isAdmin, userId, teamId }) => {
         fields: [
           {
             title: msg.show.title.userSolved,
-            value: ticketsSolved ? format(ticketsSolved) : msg.show.list.noSolved,
+            value: ticketsSolved ? msg.show.list.format(ticketsSolved) : msg.show.list.noSolved,
           },
           {
             title: msg.show.title.userOpen,
-            value: ticketsOpen ? format(ticketsOpen) : msg.show.list.noOpen,
+            value: ticketsOpen ? msg.show.list.format(ticketsOpen) : msg.show.list.noOpen,
           },
         ],
       };
@@ -106,24 +102,24 @@ exports.helpOrShowInteractive = (isAdmin, message) => ({
  * @returns {object} Constructed attachment to send with a response message
  */
 exports.confirm = (command, ticket) => ({
-    color: '#ffd740',
-    text: msg.confirm.text(command, ticket),
-    mrkdwn_in: ['text', 'actions'],
-    callback_id: `CONFIRM_${command}`,
-    attachment_type: 'default',
-    actions: [
-      {
-        name: 'CANCEL',
-        text: msg.btn.no,
-        style: 'danger',
-        type: 'button',
+  color: '#ffd740',
+  text: msg.confirm.text(command, ticket),
+  mrkdwn_in: ['text', 'actions'],
+  callback_id: `CONFIRM_${command}`,
+  attachment_type: 'default',
+  actions: [
+    {
+      name: 'CANCEL',
+      text: msg.btn.no,
+      style: 'danger',
+      type: 'button',
       value: '',
-      },
-      {
-        name: command,
-        text: msg.btn.yes(command),
-        type: 'button',
+    },
+    {
+      name: command,
+      text: msg.btn.yes(command),
+      type: 'button',
       value: JSON.stringify(ticket),
-      },
-    ],
+    },
+  ],
 });

@@ -68,6 +68,7 @@ exports.SOLVE = async ({
   } else if (isAdmin) {
     return { attachments: [attach.confirm(command, ticket)] };
   }
+  return { text: msg.error.notAllowed, attachments: [attach.usage(isAdmin)] };
 };
 
 exports.UNSOLVE = async ({
