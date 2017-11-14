@@ -67,6 +67,11 @@ exports.msg = {
       empty: 'No tickets to show :success-bunny:',
       noOpen: 'No open tickets to show :success-bunny:',
       noSolved: 'No solved tickets to show.',
+      format: (list, isAdmin = false) =>
+        list
+          .map(ticket =>
+            `*#${ticket.number}* ${ticket.text}${isAdmin ? ` from <@${ticket.author}>` : ''}`)
+          .join('\n'),
     },
   },
   error: {
@@ -100,5 +105,6 @@ exports.msg = {
     confirm: command => upperCaseFirst(command),
     view: 'View all',
   },
-  notify: number => `Your ticket *#${number}* has been solved :success-bunny:`,
+  notify: (number, userId, text) =>
+    `Your ticket has been solved by <@${userId}>: *#${number}* ${text}`,
 };

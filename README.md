@@ -16,13 +16,12 @@ Get the app at https://tickybott.herokuapp.com/
 ## Usage
 - Use `/ticket help` to see usage instructions
 - Use `/ticket show` to see open and/or solved tickets
-#### Users
 - Use `/ticket [message]` or `/ticket open [message]` to open a new ticket
-- Use `/ticket unsolve #[ticket number]` to reopen a solved ticket if the issue hasn't been fixed
-- Use `/ticket close #[ticket number]` to close a solved ticket
-
 #### Team owners and admins:
 - Use `/ticket solve #[ticket number]` to mark tickets as solved and notify their authors
+#### Team members
+- Use `/ticket unsolve #[ticket number]` to reopen a solved ticket if the issue hasn't been fixed
+- Use `/ticket close #[ticket number]` to close a solved ticket
 
 ## Authors
 * [osycon](https://github.com/osycon) (Team Leader)
