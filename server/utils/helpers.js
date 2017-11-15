@@ -94,21 +94,19 @@ exports.msg = {
         case 'SOLVE':
           return `Solve ticket *#${number}* from <@${author}>: ${text}?`;
         case 'UNSOLVE':
-          return `Reopen ticket *#${number}*: ${text}?`;
+          return `Unsolve ticket *#${number}*: ${text}?`;
         default:
           return `Close ticket *#${number}*: ${text}?`;
       }
     },
     submit: (number, text) => `:white_check_mark: Ticket *#${number}* opened: ${text}`,
-    newStatus: (number, command) =>
-      `:white_check_mark: Ticket *#${number}* is now *${newStatus[command]}*.`,
+    newStatus: (number, status) => `:white_check_mark: Ticket *#${number}* is now *${status}*.`,
   },
   btn: {
     no: 'Cancel',
-    yes: command => (command === 'UNSOLVE' ? 'Reopen' : upperCaseFirst(command)),
-    confirm: command => upperCaseFirst(command),
+    yes: command => upperCaseFirst(command),
     view: 'View all',
   },
   notify: (number, userId, text) =>
-    `Your ticket has been solved by <@${userId}>: *#${number}* ${text}`,
+    `Your ticket *#${number}* has been solved by <@${userId}>.\nText: ${text}`,
 };

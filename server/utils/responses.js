@@ -128,8 +128,9 @@ exports.CONFIRM = async ({
     });
     message = msg.confirm.submit(num, text);
   } else {
-    await fb.updateTicket(id, author, teamId, newStatus[command]);
-    message = msg.confirm.newStatus(number, command);
+    const status = newStatus[command];
+    await fb.updateTicket(id, author, teamId, status);
+    message = msg.confirm.newStatus(number, status);
     if (command === 'SOLVE' && author !== userId) {
       sendDM(author, userId, teamId, number, text);
     }
