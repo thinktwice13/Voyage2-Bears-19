@@ -3,7 +3,7 @@ exports.commands = ['HELP', 'SHOW', 'OPEN', 'CLOSE', 'UNSOLVE', 'SOLVE'];
 exports.examples = {
   full: {
     user: [
-      'Use `/ticket` to report issues and problems to team admins. You will be notified when your issue has been fixed.',
+      'Use `/ticket` to report issues and problems to team admins.',
       '`/ticket help` to show usage instructions.',
       '`/ticket show` to show a list of your solved and open tickets.',
       '`/ticket [message]` or `/ticket open [message]` to open a new ticket.',
@@ -13,6 +13,7 @@ exports.examples = {
     admin: [
       '`/ticket help` to show usage instructions.',
       '`/ticket show` to show a list of open tickets.',
+      '`/ticket [message]` or `/ticket open [message]` to open a new ticket.',
       '`/ticket solve #[ticket number]` to solve a ticket and notifiy the author.',
     ],
   },

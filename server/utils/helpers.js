@@ -11,12 +11,9 @@ const upperCaseFirst = str => str.charAt(0).toUpperCase() + str.slice(1).toLower
  * @param {string} inputText
  */
 exports.parseInputText = (inputText) => {
-  if (!inputText) {
-    return { command: 'HELLO' };
-  }
+  if (!inputText) return { command: 'HELLO' };
 
   let command;
-  let message;
   let number;
 
   // Tokenize input and uppercase first word
@@ -30,27 +27,26 @@ exports.parseInputText = (inputText) => {
     tokenized = tokenized.filter(token => token !== ticketReference[0]);
   }
 
-  // Join message and set no-command to OPEN command
-  if (commands.includes(command)) {
-    message = tokenized.splice(1).join(' ');
-  } else {
-    message = tokenized.join(' ');
+  if (!commands.includes(command)) {
     command = 'OPEN';
+    tokenized.unshift(command);
   }
 
-  // If required number or message missing, return ERROR command
-  if (
-    (!message && command === 'OPEN') ||
-    (!number && (command === 'SOLVE' || command === 'UNSOLVE' || command === 'CLOSE'))
-  ) {
-    command = 'ERROR';
-  }
+  const message = tokenized.splice(1).join(' ');
 
-  return {
-    command,
-    message,
-    number,
-  };
+  switch (command) {
+    case 'OPEN':
+      return message ? { command, message } : { command: 'ERROR' };
+    case 'CLOSE':
+    case 'SOLVE':
+    case 'UNSOLVE':
+      return number ? { command, number } : { command: 'ERROR' };
+    case 'HELP':
+    case 'SHOW':
+      return { command };
+    default:
+      return { command: 'ERROR' };
+  }
 };
 
 exports.msg = {
@@ -71,10 +67,16 @@ exports.msg = {
       empty: 'No tickets to show :success-bunny:',
       noOpen: 'No open tickets to show :success-bunny:',
       noSolved: 'No solved tickets to show.',
+      format: (list, isAdmin = false) =>
+        list
+          .map(ticket =>
+            `*#${ticket.number}* ${ticket.text}${isAdmin ? ` from <@${ticket.author}>` : ''}`)
+          .join('\n'),
     },
   },
   error: {
     text: ":thinking_face: I'm sorry, I don't understand. Check usage instructions below:",
+    notAuthor: number => `:no_entry_sign: Ticket *#${number}* is not yours.`,
     badTeam: number => `:no_entry_sign: Ticket *#${number}* doesn't exist in this team.`,
     notAllowedStatus: ({ number, author, status }) =>
       `:no_entry_sign: Not allowed. Ticket *#${number}* from <@${author}> is *${status}*.`,
@@ -104,5 +106,6 @@ exports.msg = {
     confirm: command => upperCaseFirst(command),
     view: 'View all',
   },
-  notify: number => `Your ticket *#${number}* has been solved :success-bunny:`,
+  notify: (number, userId, text) =>
+    `Your ticket has been solved by <@${userId}>: *#${number}* ${text}`,
 };
