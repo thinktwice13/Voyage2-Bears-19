@@ -58,7 +58,8 @@ exports.msg = {
   },
   show: {
     title: {
-      adminTitle: 'All tickets',
+      adminOpen: 'All open tickets',
+      adminSolved: 'Your solved tickets',
       userTitle: 'Your tickets',
       userOpen: 'Pending',
       userSolved: 'Solved',
