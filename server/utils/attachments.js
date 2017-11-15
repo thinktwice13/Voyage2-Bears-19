@@ -110,9 +110,9 @@ exports.helpOrShowInteractive = (isAdmin, message) => ({
  * @param {object} ticket: {id, text, number} - Ticket referenced in a slash command
  * @returns {object} Constructed attachment to send with a response message
  */
-exports.confirm = (command, ticket) => ({
+exports.confirm = (command, ticket, solveToClose = false) => ({
   color: '#ffd740',
-  text: msg.confirm.text(command, ticket),
+  text: solveToClose ? msg.confirm.solveToClose(ticket) : msg.confirm.text(command, ticket),
   mrkdwn_in: ['text', 'actions'],
   callback_id: `CONFIRM_${command}`,
   attachment_type: 'default',
@@ -127,6 +127,12 @@ exports.confirm = (command, ticket) => ({
     {
       name: command,
       text: msg.btn.yes(command),
+      type: 'button',
+      value: JSON.stringify(ticket),
+    },
+    solveToClose && {
+      name: 'CLOSE',
+      text: msg.btn.yes('CLOSE'),
       type: 'button',
       value: JSON.stringify(ticket),
     },

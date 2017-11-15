@@ -85,6 +85,8 @@ exports.msg = {
     notAllowed: ':no_entry_sign: Not allowed.',
   },
   confirm: {
+    solveToClose: ({ number, text }) =>
+      `Ticket *#${number}* is yours. Solve or close?\nText: ${text}`,
     text: (command, { number, text, author }) => {
       switch (command) {
         case 'OPEN':

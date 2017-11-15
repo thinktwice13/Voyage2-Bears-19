@@ -48,7 +48,14 @@ exports.OPEN = ({ command, ticket }) => ({
 });
 
 exports.SOLVE = ({
-  isAdmin, command, teamId, ticket, ticket: { number, team, status },
+  isAdmin,
+  command,
+  userId,
+  teamId,
+  ticket,
+  ticket: {
+    number, team, status, author,
+  },
 }) => {
   if (!isAdmin) {
     return { text: msg.error.notAllowed, attachments: [attach.usage(isAdmin)] };
@@ -57,7 +64,7 @@ exports.SOLVE = ({
   } else if (status !== 'open') {
     return { text: msg.error.notAllowedStatus(ticket) };
   }
-  return { attachments: [attach.confirm(command, ticket)] };
+  return { attachments: [attach.confirm(command, ticket, userId === author)] };
 };
 
 exports.UNSOLVE = ({
