@@ -18,11 +18,11 @@ exports.usage = isAdmin => ({
  * @param{string} userId
  */
 exports.show = ({ isAdmin, userId, teamId }) => {
-  let promises = null;
+  const promises = [fb.getAllSolvedTicketsByUser(userId)];
   if (isAdmin) {
-    promises = [fb.getAllOpenTicketsByTeam(teamId)];
+    promises.push(fb.getAllOpenTicketsByTeam(teamId));
   } else {
-    promises = [fb.getAllOpenTicketsByUser(userId), fb.getAllSolvedTicketsByUser(userId)];
+    promises.push(fb.getAllOpenTicketsByUser(userId));
   }
 
   const base = {
@@ -31,13 +31,12 @@ exports.show = ({ isAdmin, userId, teamId }) => {
   };
 
   return Promise.all(promises)
-    .then((tickets) => {
-      const ticketsOpen =
-        tickets[0] && Object.values(tickets[0]).filter(ticket => ticket.team === teamId);
+    .then(([solved, open]) => {
       const ticketsSolved =
-        tickets[1] && Object.values(tickets[1]).filter(ticket => ticket.team === teamId);
+        solved && Object.values(solved).filter(ticket => ticket.team === teamId);
+      const ticketsOpen = open && Object.values(open).filter(ticket => ticket.team === teamId);
 
-      // If no tickets in database
+      // If no tickets found in database
       if (!ticketsOpen && !ticketsSolved) {
         return { ...base, text: msg.show.list.empty };
       }
@@ -46,8 +45,18 @@ exports.show = ({ isAdmin, userId, teamId }) => {
         return {
           ...base,
           pretext: examples.short.admin,
-          title: msg.show.title.adminTitle,
-          text: ticketsOpen ? msg.show.list.format(ticketsOpen, isAdmin) : msg.show.list.noOpen,
+          fields: [
+            ticketsSolved && {
+              title: msg.show.title.adminSolved,
+              value: msg.show.list.format(ticketsSolved),
+            },
+            {
+              title: msg.show.title.adminOpen,
+              value: ticketsOpen
+                ? msg.show.list.format(ticketsOpen, isAdmin)
+                : msg.show.list.noOpen,
+            },
+          ],
         };
       }
       return {
