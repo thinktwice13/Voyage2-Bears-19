@@ -23,7 +23,16 @@ exports.getUserInfo = async (userId, teamId) => {
 };
 
 /**
- * Notofies user when their ticket is solved
+exports.getTeamInfo = async token =>
+  request
+    .post('https://slack.com/api/team.info', { form: { token } })
+    .then((res) => {
+      const result = JSON.parse(res);
+      if (result.ok) return result.team;
+      console.log({ getTeamError: result.error });
+    })
+    .catch(console.log);
+
  * REQUIRES chat:write, im:read, post, read scopes at
  * @param {string} authorId
  * @param {string} message - Message text to send to the user
