@@ -18,12 +18,7 @@ exports.usage = isAdmin => ({
  * @param{string} userId
  */
 exports.show = ({ isAdmin, userId, teamId }) => {
-  const promises = [fb.getAllSolvedTicketsByUser(userId)];
-  if (isAdmin) {
-    promises.push(fb.getAllOpenTicketsByTeam(teamId));
-  } else {
-    promises.push(fb.getAllOpenTicketsByUser(userId));
-  }
+  const promises = getTicketLists(userId, teamId, isAdmin);
 
   const base = {
     mrkdwn_in: ['pretext', 'text', 'fields'],
@@ -32,9 +27,8 @@ exports.show = ({ isAdmin, userId, teamId }) => {
 
   return Promise.all(promises)
     .then(([solved, open]) => {
-      const ticketsSolved =
-        solved && Object.values(solved).filter(ticket => ticket.team === teamId);
-      const ticketsOpen = open && Object.values(open).filter(ticket => ticket.team === teamId);
+      const ticketsSolved = solved && Object.values(solved);
+      const ticketsOpen = open && Object.values(open);
 
       // If no tickets found in database
       if (!ticketsOpen && !ticketsSolved) {
