@@ -1,11 +1,20 @@
-const { commands, examples, newStatus } = require('../utils/constants');
+const { commands, examples } = require('../utils/constants');
+const fb = require('../handlers/firebaseHandlers');
 
 /**
  * Converts to sentence case
  * @param {string} str
+ * @returns {string} String with first letter capitalized
  */
 const upperCaseFirst = str => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
+/**
+ * Construct promises array of requested ticket lists
+ * @param {bool} isAdmin
+ * @param {string} userId
+ * @param {string} teamId
+ * @returns {array} promises of ticket lists to be fetched
+ */
 exports.getTicketLists = (userId, teamId, isAdmin) => {
   const promises = [fb.getAllSolvedTicketsByUser(userId, teamId)];
   if (isAdmin) {
@@ -19,6 +28,7 @@ exports.getTicketLists = (userId, teamId, isAdmin) => {
 /**
  * Parse input received from slack slash command
  * @param {string} inputText
+ * @returns {object} Composed parsed command, ticket text and referenced ticket number
  */
 exports.parseInputText = (inputText) => {
   if (!inputText) return { command: 'HELLO' };
@@ -59,6 +69,7 @@ exports.parseInputText = (inputText) => {
   }
 };
 
+// Textual response messages helpers
 exports.msg = {
   hello: { text: ':wave: Hello! Need help with `/ticket`?' },
   help: {
@@ -95,8 +106,8 @@ exports.msg = {
     notAllowed: ':no_entry_sign: Not allowed.',
   },
   confirm: {
-    solveToClose: ({ number, text }) =>
-      `Ticket *#${number}* is yours. Solve or close?\nText: ${text}`,
+    adminSelfSolve: ({ number, text }) =>
+      `This ticket is yours. Solve or close?\n*#${number}* ${text}`,
     text: (command, { number, text, author }) => {
       switch (command) {
         case 'OPEN':
@@ -117,6 +128,8 @@ exports.msg = {
     yes: command => upperCaseFirst(command),
     view: 'View all',
   },
-  notify: (number, userId, text) =>
-    `Your ticket *#${number}* has been solved by <@${userId}>.\nText: ${text}`,
+  notify: {
+    text: user => `Your ticket has been solved by <@${user}>.`,
+    att: (num, text) => `*#${num}* ${text}`,
+  },
 };
