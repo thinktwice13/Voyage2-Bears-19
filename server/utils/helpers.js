@@ -6,6 +6,16 @@ const { commands, examples, newStatus } = require('../utils/constants');
  */
 const upperCaseFirst = str => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
+exports.getTicketLists = (userId, teamId, isAdmin) => {
+  const promises = [fb.getAllSolvedTicketsByUser(userId, teamId)];
+  if (isAdmin) {
+    promises.push(fb.getAllOpenTicketsByTeam(teamId));
+  } else {
+    promises.push(fb.getAllOpenTicketsByUser(userId, teamId));
+  }
+  return promises;
+};
+
 /**
  * Parse input received from slack slash command
  * @param {string} inputText

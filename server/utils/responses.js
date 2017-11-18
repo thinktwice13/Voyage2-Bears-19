@@ -59,7 +59,7 @@ exports.SOLVE = ({
 }) => {
   if (!isAdmin) {
     return { text: msg.error.notAllowed, attachments: [attach.usage(isAdmin)] };
-  } else if (team !== teamId) {
+  } else if (!team) {
     return { text: msg.error.badTeam(number) };
   } else if (status !== 'open') {
     return { text: msg.error.notAllowedStatus(ticket) };
@@ -68,15 +68,11 @@ exports.SOLVE = ({
 };
 
 exports.UNSOLVE = ({
-  command,
-  userId,
-  teamId,
-  ticket,
-  ticket: {
+  command, userId, ticket, ticket: {
     number, author, status, team,
   },
 }) => {
-  if (team !== teamId) {
+  if (!team) {
     return { text: msg.error.badTeam(number) };
   } else if (status !== 'solved') {
     return { text: msg.error.notAllowedStatus(ticket) };
@@ -91,7 +87,7 @@ exports.CLOSE = ({
     number, author, status, team,
   },
 }) => {
-  if (team !== teamId) {
+  if (!team) {
     return { text: msg.error.badTeam(number) };
   } else if (status === 'closed') {
     return { text: msg.error.closed(number) };
@@ -122,9 +118,7 @@ exports.CONFIRM = async ({
     const num = await fb.addNewTicket({
       userId,
       teamId,
-      username,
       text: text.charAt(0).toUpperCase() + text.slice(1), // uppercase first letter
-      isAdmin,
     });
     message = msg.confirm.submit(num, text);
   } else {
