@@ -1,6 +1,7 @@
 const request = require('request');
 const path = require('path');
 const { setTokens } = require('../handlers/firebaseHandlers');
+const { getTeamInfo } = require('../handlers/slackApiHandlers');
 
 module.exports = (app) => {
   app.get('/slack', (req, res) => {
@@ -17,11 +18,12 @@ module.exports = (app) => {
       },
     };
     // Exchnge temporary code fro access tokens
-    request.post('https://slack.com/api/oauth.access', data, (error, response, body) => {
+    request.post('https://slack.com/api/oauth.access', data, async (error, response, body) => {
       if (!error && response.statusCode === 200) {
         const { team_id, access_token, bot: { bot_access_token } } = JSON.parse(body);
         // Save user's access tokens to database
         setTokens(team_id, access_token, bot_access_token);
+        // const teamDomain = (await getTeamInfo(access_token)).domain; // Get team domain name
         res.redirect('/success.html');
       }
     });
