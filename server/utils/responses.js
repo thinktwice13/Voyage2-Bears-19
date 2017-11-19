@@ -2,7 +2,7 @@ const attach = require('./attachments');
 const fb = require('../handlers/firebaseHandlers');
 const { newStatus } = require('../utils/constants');
 const { msg } = require('../utils/helpers');
-const { sendDM } = require('../handlers/slackApiHandlers');
+const slackApi = require('../handlers/slackApiHandlers');
 
 // INITIAL SLASH COMMAND RESPONSES
 
@@ -139,10 +139,11 @@ exports.CONFIRM = async ({
 }) => {
   let message = '';
   if (command === 'OPEN') {
+    text = text.charAt(0).toUpperCase() + text.slice(1); // uppercase first letter
     const num = await fb.addNewTicket({
       userId,
       teamId,
-      text: text.charAt(0).toUpperCase() + text.slice(1), // uppercase first letter
+      text,
     });
     message = msg.confirm.submit(num, text);
   } else {
@@ -150,7 +151,7 @@ exports.CONFIRM = async ({
     await fb.updateTicket(id, author, teamId, status);
     message = msg.confirm.newStatus(number, status);
     if (command === 'SOLVE' && author !== userId) {
-      sendDM(author, userId, teamId, number, text);
+      slackApi.sendDM(author, userId, teamId, number, text);
     }
   }
 

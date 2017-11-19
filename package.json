@@ -16,7 +16,7 @@
   },
   "homepage": "https://tickybott.herokuapp.com/",
   "scripts": {
-    "test": "jest --watchAll --coverage",
+    "test": "jest -i --watchAll --coverage",
     "dev:client": "NODE_ENV=development webpack-dev-server",
     "dev:server": "nodemon -r dotenv/config ./server/server.js",
     "dev": "npm-run-all -pnr test dev:*",

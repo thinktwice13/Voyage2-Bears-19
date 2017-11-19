@@ -1,7 +1,10 @@
 require('dotenv').load({ path: '.env.test' });
 const fb = require('../server/handlers/firebaseHandlers');
 const res = require('../server/utils/responses');
-const { msg } = require('../server/utils/helpers');
+const help = require('../server/utils/helpers');
+const slackApi = require('../server/handlers/slackApiHandlers');
+
+const { msg } = help;
 
 // Params
 let prm = {
@@ -10,9 +13,14 @@ let prm = {
   text: 'text1',
 };
 
-describe('General slash command responses', () => {
-  beforeAll(fb.removeAllTickets);
+beforeAll(() => {
+  fb.removeAllTickets();
+});
+afterAll(() => {
+  fb.removeAllTickets();
+});
 
+describe('General slash command responses', () => {
   test('User HELLO command', () => {
     expect(res.HELLO(prm)).toMatchObject({
       text: msg.hello.text,
@@ -26,13 +34,6 @@ describe('General slash command responses', () => {
       attachments: [{ text: msg.help.att(false) }],
     });
   });
-
-  test('User SHOW command with no tickets', () =>
-    res.SHOW(prm).then((res) => {
-      expect(res).toMatchObject({
-        attachments: [{ text: msg.show.list.empty }],
-      });
-    }));
 
   test('User ERROR command', () => {
     expect(res.ERROR(prm)).toMatchObject({
@@ -67,6 +68,112 @@ describe('General slash command responses', () => {
         text: 'View all',
       },
     ]);
+  });
+});
+
+describe('SHOW command', () => {
+  const seedTickets = [
+    {
+      id1: {
+        author: 'user1',
+        text: 'text1',
+        status: 'solved',
+        number: 11,
+      },
+    },
+    {
+      id2: {
+        author: 'user1',
+        text: 'text2',
+        status: 'open',
+        number: 22,
+      },
+    },
+  ];
+  test('SHOW command with no tickets', () => {
+    help.getTicketLists = jest.fn(() => []);
+    return res.SHOW(prm).then((res) => {
+      expect(help.getTicketLists).toBeCalled();
+      expect(res).toMatchObject({
+        attachments: [{ text: msg.show.list.empty }],
+      });
+    });
+  });
+
+  test('User SHOW command with found tickets', () => {
+    prm.isAdmin = false;
+    help.getTicketLists = jest.fn(() => seedTickets);
+    return res.SHOW(prm).then((res) => {
+      expect(help.getTicketLists).toBeCalled();
+      expect(res).toMatchObject({
+        attachments: [
+          {
+            title: msg.show.title.userTitle,
+            fields: [{ title: msg.show.title.userSolved }, { title: msg.show.title.userOpen }],
+          },
+        ],
+      });
+    });
+  });
+
+  test('Admin SHOW command with found tickets', () => {
+    prm.isAdmin = true;
+    help.getTicketLists = jest.fn(() => seedTickets);
+    return res.SHOW(prm).then((res) => {
+      expect(help.getTicketLists).toBeCalled();
+      expect(res).toMatchObject({
+        attachments: [
+          {
+            fields: [{ title: msg.show.title.adminSolved }, { title: msg.show.title.adminOpen }],
+          },
+        ],
+      });
+    });
+  });
+});
+
+describe('Action confirmation responses', () => {
+  prm = { ...prm, command: 'OPEN', ticket: { author: 'user1', text: 'text', number: 10 } };
+  test('Confirm OPEN', () => {
+    fb.addNewTicket = jest.fn(() => 10);
+    return res.CONFIRM(prm).then((res) => {
+      expect(fb.addNewTicket).toBeCalledWith({
+        userId: prm.userId,
+        teamId: prm.teamId,
+        text: 'Text',
+      });
+      expect(res).toMatchObject({ text: msg.confirm.submit(10, 'Text') });
+    });
+  });
+
+  test('Confirm SOLVE command with ticket.author === user', () => {
+    prm.command = 'SOLVE';
+    fb.updateTicket = jest.fn();
+    slackApi.sendDM = jest.fn();
+    fb.addNewTicket = jest.fn();
+    return res.CONFIRM(prm).then((res) => {
+      expect(fb.addNewTicket).not.toBeCalled();
+      expect(fb.updateTicket).toBeCalled();
+      expect(slackApi.sendDM).not.toBeCalled();
+      expect(res).toMatchObject({
+        text: msg.confirm.newStatus(10, 'solved'),
+      });
+    });
+  });
+
+  test('Confirm SOLVE command with ticket.author !== user', () => {
+    prm.ticket.author = 'notUser';
+    fb.updateTicket = jest.fn();
+    slackApi.sendDM = jest.fn();
+    fb.addNewTicket = jest.fn();
+    return res.CONFIRM(prm).then((res) => {
+      expect(fb.addNewTicket).not.toBeCalled();
+      expect(fb.updateTicket).toBeCalled();
+      expect(slackApi.sendDM).toBeCalled();
+      expect(res).toMatchObject({
+        text: msg.confirm.newStatus(10, 'solved'),
+      });
+    });
   });
 });
 

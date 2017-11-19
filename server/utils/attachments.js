@@ -1,5 +1,7 @@
-const { msg, getTicketLists } = require('../utils/helpers');
+const help = require('../utils/helpers');
 const { examples } = require('../utils/constants');
+
+const { msg } = help;
 
 /**
  * @param {bool} isAdmin - Admin status
@@ -20,7 +22,7 @@ exports.usage = isAdmin => ({
  * @returns {object} formatted response object
  */
 exports.show = ({ isAdmin, userId, teamId }) => {
-  const promises = getTicketLists(userId, teamId, isAdmin);
+  const promises = help.getTicketLists(userId, teamId, isAdmin);
 
   const base = {
     mrkdwn_in: ['pretext', 'text', 'fields'],
