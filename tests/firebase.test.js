@@ -8,9 +8,14 @@ const ticket5 = {
   text: 'text5',
 };
 
-describe('Firebase ticket handlers', () => {
-  beforeAll(fb.removeAllTickets);
+beforeAll(() => {
+  fb.removeAllTickets();
+});
+afterAll(() => {
+  fb.removeAllTickets();
+});
 
+describe('Firebase ticket handlers', () => {
   let ticketId = null;
 
   test('Add a new ticket', () =>
