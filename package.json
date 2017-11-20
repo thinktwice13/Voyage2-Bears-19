@@ -27,7 +27,8 @@
   "author": "Osycon, thinktwice13, miljan-fsd, Zsolti",
   "license": "MIT",
   "eslintConfig": {
-    "extends": "airbnb-base"
+    "extends": "airbnb-base",
+    "env": { "jest": true }
   },
   "dependencies": {
     "body-parser": "^1.18.2",
