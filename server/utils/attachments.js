@@ -1,9 +1,11 @@
-const fb = require('../handlers/firebaseHandlers');
-const { msg } = require('../utils/helpers');
+const help = require('../utils/helpers');
 const { examples } = require('../utils/constants');
+
+const { msg } = help;
 
 /**
  * @param {bool} isAdmin - Admin status
+ * @returns {object} formatted response object
  */
 exports.usage = isAdmin => ({
   color: '#36a64f',
@@ -13,17 +15,14 @@ exports.usage = isAdmin => ({
 });
 
 /**
- * @param {bool} isAdmin - Admin status
- * @param {array} tickets - An array of prefetced tickets
- * @param{string} userId
+ * @param {object}
+ * @param {bool} object.isAdmin - Admin status
+ * @param {string} object.userId
+ * @param {string} object.teamId
+ * @returns {object} formatted response object
  */
 exports.show = ({ isAdmin, userId, teamId }) => {
-  const promises = [fb.getAllSolvedTicketsByUser(userId)];
-  if (isAdmin) {
-    promises.push(fb.getAllOpenTicketsByTeam(teamId));
-  } else {
-    promises.push(fb.getAllOpenTicketsByUser(userId));
-  }
+  const promises = help.getTicketLists(userId, teamId, isAdmin);
 
   const base = {
     mrkdwn_in: ['pretext', 'text', 'fields'],
@@ -32,9 +31,8 @@ exports.show = ({ isAdmin, userId, teamId }) => {
 
   return Promise.all(promises)
     .then(([solved, open]) => {
-      const ticketsSolved =
-        solved && Object.values(solved).filter(ticket => ticket.team === teamId);
-      const ticketsOpen = open && Object.values(open).filter(ticket => ticket.team === teamId);
+      const ticketsSolved = solved && Object.values(solved);
+      const ticketsOpen = open && Object.values(open);
 
       // If no tickets found in database
       if (!ticketsOpen && !ticketsSolved) {
@@ -79,12 +77,11 @@ exports.show = ({ isAdmin, userId, teamId }) => {
 };
 
 /**
- * @param {bool} isAdmin -  admin status
- * @param {string} message
- * @returns {object} Response message
+ * Response returned on cancelled action
+ * @returns {object} formatted response object
  */
-exports.helpOrShowInteractive = (isAdmin, message) => ({
-  text: message,
+exports.helpOrShowInteractive = () => ({
+  text: 'Cancelled',
   color: '#F4511E',
   mrkdwn_in: ['text', 'actions'],
   callback_id: 'helpOrShow',
@@ -106,13 +103,15 @@ exports.helpOrShowInteractive = (isAdmin, message) => ({
 });
 
 /**
+ * @param {object}
  * @param {string} command - Initial slash command
  * @param {object} ticket: {id, text, number} - Ticket referenced in a slash command
- * @returns {object} Constructed attachment to send with a response message
+ * @param {bool} adminSelfSolve - if admin is solving his/her own ticket
+ * @returns {object} formatted response object
  */
-exports.confirm = (command, ticket, solveToClose = false) => ({
+exports.confirm = (command, ticket, adminSelfSolve = false) => ({
   color: '#ffd740',
-  text: solveToClose ? msg.confirm.solveToClose(ticket) : msg.confirm.text(command, ticket),
+  text: adminSelfSolve ? msg.confirm.adminSelfSolve(ticket) : msg.confirm.text(command, ticket),
   mrkdwn_in: ['text', 'actions'],
   callback_id: `CONFIRM_${command}`,
   attachment_type: 'default',
@@ -130,7 +129,7 @@ exports.confirm = (command, ticket, solveToClose = false) => ({
       type: 'button',
       value: JSON.stringify(ticket),
     },
-    solveToClose && {
+    adminSelfSolve && {
       name: 'CLOSE',
       text: msg.btn.yes('CLOSE'),
       type: 'button',

@@ -15,11 +15,7 @@ module.exports = async (req, res) => {
    */
 
   const {
-    text,
-    user_id: userId,
-    team_id: teamId,
-    user_name: username,
-    response_url: responseURL,
+    text, user_id: userId, team_id: teamId, response_url: responseURL,
   } = req.body;
 
   // Parse incoming input into command, ticket message and ticket reference number
@@ -28,7 +24,7 @@ module.exports = async (req, res) => {
   // Construct promises array for initial async calls
   const promises = [getUserInfo(userId, teamId)];
   if (number) {
-    promises.push(getTicketByNumber(number));
+    promises.push(getTicketByNumber(number, teamId));
   }
 
   // Get admin status and construct the ticket from new or fetched data
@@ -42,7 +38,6 @@ module.exports = async (req, res) => {
   const responseParams = {
     command,
     userId,
-    username,
     teamId,
     isAdmin,
     ticket,

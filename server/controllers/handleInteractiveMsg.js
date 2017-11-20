@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
    */
   const {
     callback_id: callbackId,
-    user: { id: userId, name: username },
+    user: { id: userId },
     team: { id: teamId },
     response_url: responseURL,
     actions: [{ name: command, value: ticket }],
@@ -23,7 +23,6 @@ module.exports = async (req, res) => {
     isAdmin,
     callbackId,
     userId,
-    username,
     teamId,
     command,
     ticket: ticket && JSON.parse(ticket),
