@@ -117,11 +117,18 @@ exports.getTicketByNumber = async (num, teamId) => {
  * @param {string} newStatus
  * @returns {object} ticket
  */
-exports.updateTicket = async (ticketId, authorId, teamId, newStatus) => {
+exports.updateTicket = async (
+  ticketId,
+  authorId,
+  teamId,
+  newStatus,
+  expiresAt
+) => {
   const ticketRef = firebase.database().ref(`tickets/${teamId}/${ticketId}`);
   ticketRef.update({
     status: newStatus,
     author_status: `${authorId}_${newStatus}`,
+    expiresAt,
   });
   const values = await ticketRef.once('value');
   return values.val();
