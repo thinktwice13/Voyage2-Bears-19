@@ -32,6 +32,7 @@ const ticketIncrement = async teamId =>
  */
 exports.addNewTicket = async ({ userId, teamId, text }) => {
   const number = await ticketIncrement(teamId);
+  const createdAt = +Date.now();
   firebase
     .database()
     .ref(`tickets/${teamId}`)
@@ -43,6 +44,7 @@ exports.addNewTicket = async ({ userId, teamId, text }) => {
       author: userId,
       author_status: `${userId}_open`,
       team: teamId,
+      createdAt,
     });
   return number;
 };
@@ -83,7 +85,7 @@ exports.getAllSolvedTicketsByUser = async (userId, teamId) => {
  * @param {string} teamId
  * @returns {object} collection of tickets
  */
-exports.getAllOpenTicketsByTeam = async (teamId) => {
+exports.getAllOpenTicketsByTeam = async teamId => {
   const tickets = firebase.database().ref(`tickets/${teamId}`);
   const values = await tickets
     .orderByChild('status')
@@ -143,7 +145,7 @@ exports.setTokens = async (teamId, accessToken, botToken) =>
  * @param {string} teamId
  * @returns {object} saved team tokens
  */
-exports.getTokensByTeam = async (teamId) => {
+exports.getTokensByTeam = async teamId => {
   const ref = firebase.database().ref(`tokens/${teamId}`);
   const values = await ref.once('value');
   return values.val();
