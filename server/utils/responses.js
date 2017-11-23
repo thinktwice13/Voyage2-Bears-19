@@ -67,9 +67,7 @@ exports.SOLVE = ({
   command,
   userId,
   ticket,
-  ticket: {
-    number, team, status, author,
-  },
+  ticket: { number, team, status, author },
 }) => {
   if (!isAdmin) {
     return { text: msg.error.notAllowed, attachments: [attach.usage(isAdmin)] };
@@ -86,9 +84,10 @@ exports.SOLVE = ({
  * @returns {object} Composed response mesage
  */
 exports.UNSOLVE = ({
-  command, userId, ticket, ticket: {
-    number, author, status, team,
-  },
+  command,
+  userId,
+  ticket,
+  ticket: { number, author, status, team },
 }) => {
   if (!team) {
     return { text: msg.error.badTeam(number) };
@@ -105,9 +104,10 @@ exports.UNSOLVE = ({
  * @returns {object} Composed response mesage
  */
 exports.CLOSE = ({
-  command, userId, ticket, ticket: {
-    number, author, status, team,
-  },
+  command,
+  userId,
+  ticket,
+  ticket: { number, author, status, team },
 }) => {
   if (!team) {
     return { text: msg.error.badTeam(number) };
@@ -133,9 +133,10 @@ exports.CANCEL = () => ({
  * @returns {object} Composed response mesage
  */
 exports.CONFIRM = async ({
-  command, userId, teamId, ticket: {
-    text, id, author, number,
-  },
+  command,
+  userId,
+  teamId,
+  ticket: { text, id, author, number },
 }) => {
   let message = '';
   if (command === 'OPEN') {
@@ -148,7 +149,11 @@ exports.CONFIRM = async ({
     message = msg.confirm.submit(num, text);
   } else {
     const status = newStatus[command];
-    await fb.updateTicket(id, author, teamId, status);
+    let expiresAt = null;
+    if (command === 'SOLVE') {
+      expiresAt = +Date.now() + 1000 * 60 * 60 * 24 * 8;
+    }
+    await fb.updateTicket(id, author, teamId, status, expiresAt);
     message = msg.confirm.newStatus(number, status);
     if (command === 'SOLVE' && author !== userId) {
       slackApi.sendDM(author, userId, teamId, number, text);
