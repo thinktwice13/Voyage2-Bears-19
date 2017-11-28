@@ -68,7 +68,7 @@ describe('Firebase ticket handlers', () => {
     }));
 
   test('Updates a ticket', () =>
-    fb.updateTicket(ticketId, 'user1', 'team1', 'solved').then((ticket) => {
+    fb.updateTicket(ticketId, 'user1', 'team1', 'solved', 54321).then((ticket) => {
       expect(ticket).toBeInstanceOf(Object);
       expect(ticket).toMatchObject({
         status: 'solved',
