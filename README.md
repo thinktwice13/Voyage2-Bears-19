@@ -23,17 +23,17 @@ Get the app at https://tickybott.herokuapp.com/
 - Use `/ticket [message]` or `/ticket open [message]` to open a new ticket
 
 ![/ticket or /ticket open](https://imgur.com/HHN7zBb.gif)
-#### Team owners and admins:
-- Use `/ticket solve #[ticket number]` to mark tickets as solved and notify their authors
-
-![/ticket solve #[1]](https://imgur.com/saUjq3L.gif)
-#### Team members
 - Use `/ticket unsolve #[ticket number]` to reopen a solved ticket if the issue hasn't been fixed
 
 ![/ticket unsolve](https://imgur.com/ypZadm7.gif)
 - Use `/ticket close #[ticket number]` to close a solved ticket
 
 ![/ticket close #[1]](https://imgur.com/XNFNsN9.gif)
+#### Restricted to team owners and admins:
+- Use `/ticket solve #[ticket number]` to mark tickets as solved and notify their authors
+
+![/ticket solve #[1]](https://imgur.com/saUjq3L.gif)
+
 
 ## Authors
 * [osycon](https://github.com/osycon) (Team Leader)
